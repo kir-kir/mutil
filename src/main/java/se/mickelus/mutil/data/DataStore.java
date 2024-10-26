@@ -9,12 +9,11 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.forgespi.Environment;
-import net.minecraftforge.forgespi.language.IModInfo;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.minecraft.world.item.crafting.Recipe;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import net.neoforged.neoforgespi.Environment;
+import net.neoforged.neoforgespi.language.IModInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -62,7 +61,7 @@ public class DataStore<V> extends SimplePreparableReloadListener<Map<ResourceLoc
             }
 
             String path = entry.getKey().getPath();
-            ResourceLocation location = new ResourceLocation(entry.getKey().getNamespace(), path.substring(i, path.length() - jsonExtLength));
+            ResourceLocation location = ResourceLocation.fromNamespaceAndPath(entry.getKey().getNamespace(), path.substring(i, path.length() - jsonExtLength));
 
             try (Reader reader = entry.getValue().openAsReader()) {
                 JsonElement json;
@@ -176,7 +175,7 @@ public class DataStore<V> extends SimplePreparableReloadListener<Map<ResourceLoc
 
         JsonObject jsonObject = json.getAsJsonObject();
         return !jsonObject.has("conditions")
-                || CraftingHelper.processConditions(GsonHelper.getAsJsonArray(jsonObject, "conditions"), ICondition.IContext.EMPTY);
+                || Recipe.CONDITIONAL_CODEC.parse(this.makeConditionalOps(), GsonHelper.getAsJsonArray(jsonObject, "conditions")).getOrThrow(JsonParseException::new).isPresent();
     }
 
     protected void processData() {

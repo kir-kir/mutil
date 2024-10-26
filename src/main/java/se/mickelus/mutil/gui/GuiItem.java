@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 
@@ -109,7 +110,7 @@ public class GuiItem extends GuiElement {
     @Override
     public List<Component> getTooltipLines() {
         if (showTooltip && itemStack != null && hasFocus()) {
-            return new ArrayList<>(itemStack.getTooltipLines(Minecraft.getInstance().player,
+            return new ArrayList<>(itemStack.getTooltipLines(Item.TooltipContext.of(Minecraft.getInstance().level.registryAccess()), Minecraft.getInstance().player,
                     mc.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL));
         }
 
